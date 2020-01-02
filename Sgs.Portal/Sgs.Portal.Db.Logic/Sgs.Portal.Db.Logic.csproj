@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <UserSecretsId>e3a6b356-7b31-42fd-b5c3-9dd527b7666f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Sameer.Shared" Version="3.1.0.3" />
+    <PackageReference Include="Sameer.Shared.Data" Version="3.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sgs.Portal.Shared.Models\Sgs.Portal.Shared.Models.csproj" />
+    <ProjectReference Include="..\Sgs.Portal.Shared.Services\Sgs.Portal.Shared.Services.csproj" />
+  </ItemGroup>
+
+</Project>
