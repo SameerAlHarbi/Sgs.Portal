@@ -108,8 +108,11 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\CentralizedPrefixProvider.cs" />
+    <Compile Include="Managers\SAP\ISapConfiguration.cs" />
     <Compile Include="Managers\SAP\SapConfiguration.cs" />
+    <Compile Include="Managers\SAP\SapDestinationConfiguration.cs" />
     <Compile Include="Managers\SAP\SapCountriesManager.cs" />
+    <Compile Include="Managers\SAP\SapManager.cs" />
     <Compile Include="Models\Airport.cs" />
     <Compile Include="Models\City.cs" />
     <Compile Include="Models\Country.cs" />

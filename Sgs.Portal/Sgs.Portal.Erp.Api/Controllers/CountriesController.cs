@@ -30,17 +30,7 @@ namespace Sgs.Portal.Erp.Api.Controllers
         {
             try
             {
-                var results = new List<Country>
-                {
-                    new Country
-                    {
-                        Code="001",
-                        Name_Ar="",
-                        Name_En = "Saudia",
-                        NationalityName_En="Saudi"
-
-                    }
-                };
+                var results = await _countriesManager.GetCountriesCollection();
                 return Ok(results);
             }
             catch (Exception ex)

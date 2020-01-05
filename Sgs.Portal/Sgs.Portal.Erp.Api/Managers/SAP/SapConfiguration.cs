@@ -1,38 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Configuration;
+﻿using System.Configuration;
 
 namespace Sgs.Portal.Erp.Api.Managers.SAP
 {
-    public class SapConfiguration
+    public class SapConfiguration : ISapConfiguration
     {
         private readonly string _configurationType;
-
-        public string DestinationName { get; set; }
-        public string AppServerHost { get; set; }
-        public string SystemNumber { get; set; }
-        public string SystemID { get; set; }
-        public string SapUser { get; set; }
-        public string Password { get; set; }
-        public string Client { get; set; }
-        public string Language { get; set; }
-        public string PoolSize { get; set; }
 
         public SapConfiguration(string configurationType)
         {
             _configurationType = configurationType;
-            DestinationName = ConfigurationManager.AppSettings[$"{nameof(DestinationName)}.{_configurationType}"];
-            AppServerHost = ConfigurationManager.AppSettings[$"{nameof(AppServerHost)}.{_configurationType}"];
-            SystemNumber = ConfigurationManager.AppSettings[$"{nameof(SystemNumber)}.{_configurationType}"];
-            SystemID = ConfigurationManager.AppSettings[$"{nameof(SystemID)}.{_configurationType}"];
-            SapUser = ConfigurationManager.AppSettings[$"{nameof(SapUser)}.{_configurationType}"];
-            Password = ConfigurationManager.AppSettings[$"{nameof(Password)}.{_configurationType}"];
-            Client = ConfigurationManager.AppSettings[$"{nameof(Client)}.{_configurationType}"];
-            Language = ConfigurationManager.AppSettings[$"{nameof(Language)}.{_configurationType}"];
-            PoolSize = ConfigurationManager.AppSettings[$"{nameof(PoolSize)}.{_configurationType}"];
         }
-        
+
+        public string DestinationName => 
+            ConfigurationManager.AppSettings[$"{nameof(DestinationName)}.{_configurationType}"];
+
+        public string AppServerHost => 
+            ConfigurationManager.AppSettings[$"{nameof(AppServerHost)}.{_configurationType}"];
+
+        public string SystemNumber => 
+            ConfigurationManager.AppSettings[$"{nameof(SystemNumber)}.{_configurationType}"];
+
+        public string SystemID => 
+            ConfigurationManager.AppSettings[$"{nameof(SystemID)}.{_configurationType}"];
+
+        public string SapUser =>
+            ConfigurationManager.AppSettings[$"{nameof(SapUser)}.{_configurationType}"];
+
+        public string SapPassword =>
+            ConfigurationManager.AppSettings[$"{nameof(SapPassword)}.{_configurationType}"];
+
+        public string SapClient =>
+            ConfigurationManager.AppSettings[$"{nameof(SapClient)}.{_configurationType}"];
+
+        public string Language =>
+            ConfigurationManager.AppSettings[$"{nameof(Language)}.{_configurationType}"];
+
+        public string PoolSize =>
+            ConfigurationManager.AppSettings[$"{nameof(PoolSize)}.{_configurationType}"];
     }
 }

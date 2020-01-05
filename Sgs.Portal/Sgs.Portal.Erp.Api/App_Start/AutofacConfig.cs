@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Integration.WebApi;
 using AutoMapper;
+using SAP.Middleware.Connector;
 using Sgs.Portal.Erp.Api.Managers.SAP;
 using Sgs.Portal.Erp.Api.Services;
 using System.Reflection;
@@ -30,8 +31,14 @@ namespace Sgs.Portal.Erp.Api
                 //cfg.AddProfile(new CampMaooingProfile());
             });
 
-            bldr.RegisterInstance(new SapConfiguration("Default"))
-                .SingleInstance();
+            bldr.RegisterType<SapConfiguration>()
+                .As<ISapConfiguration>()
+                .WithParameter("configurationType", "Default")
+                .InstancePerRequest();
+
+            bldr.RegisterType<SapDestinationConfiguration>()
+                .As<IDestinationConfiguration>()
+                .InstancePerRequest();
 
             bldr.RegisterInstance(config.CreateMapper())
                 .As<IMapper>()
