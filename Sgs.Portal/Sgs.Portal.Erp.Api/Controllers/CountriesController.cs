@@ -26,11 +26,11 @@ namespace Sgs.Portal.Erp.Api.Controllers
         [Route()]
         [ResponseType(typeof(IEnumerable<Country>))]
         [HttpGet()]
-        public async Task<IHttpActionResult> Get()
+        public async Task<IHttpActionResult> Get(string codes = null, string name = null, string nationalityName = null, string language = "AR,EN")
         {
             try
             {
-                var results = await _countriesManager.GetCountriesCollection();
+                var results = await _countriesManager.GetCountriesCollection(codes?.Split(','),name,nationalityName,language: language);
                 return Ok(results);
             }
             catch (Exception ex)
