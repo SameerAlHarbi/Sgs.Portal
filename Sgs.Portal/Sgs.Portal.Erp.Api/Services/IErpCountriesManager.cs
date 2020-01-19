@@ -6,7 +6,7 @@ namespace Sgs.Portal.Erp.Api.Services
 {
     public interface IErpCountriesManager
     {
-        Task<IEnumerable<Country>> GetCountriesCollection(string[] codes = null
+        Task<IEnumerable<Country>> GetCountriesCollectionAsync(string[] codes = null
             , string name = null
             , string nationalityName = ""
             , bool fillRegions = false
@@ -14,21 +14,21 @@ namespace Sgs.Portal.Erp.Api.Services
             , bool fillAirports = false
             , string language = "AR,EN");
 
-        Task<IEnumerable<Region>> GetRegionsCollection(string[] codes = null
+        Task<IEnumerable<Region>> GetRegionsCollectionAsync(string[] codes = null
             , string name = null
             , string[] countriesCodes = null
             , bool fillCities = true
             , bool fillAirports = false
             , string language = "AR,EN");
 
-        Task<IEnumerable<City>> GetCitiesCollection(string[] codes = null
+        Task<IEnumerable<City>> GetCitiesCollectionAsync(string[] codes = null
             , string name = null
             , string[] countriesCodes = null
             , string[] regionsCodes = null
             , bool fillAirports = false
             , string language = "AR,EN");
 
-        Task<IEnumerable<Airport>> GetAirportCollection(string[] codes = null
+        Task<IEnumerable<Airport>> GetAirportCollectionAsync(string[] codes = null
             , string name = null
             , string[] countriesCodes = null
             , string[] citiesCodes = null

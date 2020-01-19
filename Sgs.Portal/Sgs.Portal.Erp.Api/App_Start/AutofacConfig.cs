@@ -25,11 +25,18 @@ namespace Sgs.Portal.Erp.Api
 
         private static void RegisterServices(ContainerBuilder bldr)
         {
-            var config = new MapperConfiguration(cfg =>
+            //Auto Mapping
+            var mappingConfigs = new MapperConfiguration(cfg =>
             {
                 //Add profiles here
                 //cfg.AddProfile(new CampMaooingProfile());
             });
+
+            bldr.RegisterInstance(mappingConfigs.CreateMapper())
+                .As<IMapper>()
+                .SingleInstance();
+
+            //Sap Services
 
             bldr.RegisterType<SapConfiguration>()
                 .As<ISapConfiguration>()
@@ -39,10 +46,6 @@ namespace Sgs.Portal.Erp.Api
             bldr.RegisterType<SapDestinationConfiguration>()
                 .As<IDestinationConfiguration>()
                 .InstancePerRequest();
-
-            bldr.RegisterInstance(config.CreateMapper())
-                .As<IMapper>()
-                .SingleInstance();
 
             bldr.RegisterType<SapCountriesManager>()
                 .As<IErpCountriesManager>()

@@ -10,6 +10,8 @@ namespace Sgs.Portal.Erp.Api.Models
 
         public string Name_En { get; set; }
 
+        public string CountryCode { get; set; }
+
         public string RegionCode { get; set; }
 
         public List<Airport> Airports { get; set; }

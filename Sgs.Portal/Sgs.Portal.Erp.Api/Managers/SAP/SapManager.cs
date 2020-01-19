@@ -1,4 +1,5 @@
 ﻿using SAP.Middleware.Connector;
+using System;
 
 namespace Sgs.Portal.Erp.Api.Managers.SAP
 {
@@ -7,28 +8,45 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
         private readonly IDestinationConfiguration _destinationConfiguration;
         private readonly ISapConfiguration _sapConfiguration;
 
-        protected readonly RfcDestination rfcDestination;
-        protected readonly RfcRepository rfcRepository;
+        protected RfcDestination rfcDestination;
+        protected RfcRepository rfcRepository;
 
         public SapManager(IDestinationConfiguration destinationConfiguration, 
             ISapConfiguration sapConfiguration)
         {
-            _destinationConfiguration = destinationConfiguration;
-            _sapConfiguration = sapConfiguration;
-
-            if (RfcDestinationManager.TryGetDestination(destinationName: _sapConfiguration.DestinationName) == null)
+            try
             {
-                RfcDestinationManager.RegisterDestinationConfiguration(_destinationConfiguration);
+                _destinationConfiguration = destinationConfiguration;
+                _sapConfiguration = sapConfiguration;
             }
-
-        rfcDestination = RfcDestinationManager
-                .GetDestination(destinationName: _sapConfiguration.DestinationName);
-            rfcRepository = rfcDestination.Repository;
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         protected IRfcFunction getIRfcFunction(string functionName)
         {
-            return rfcRepository.CreateFunction(functionName);
+            try
+            {
+                if (RfcDestinationManager.TryGetDestination(destinationName: _sapConfiguration.DestinationName) == null)
+                {
+                    RfcDestinationManager.RegisterDestinationConfiguration(_destinationConfiguration);
+                }
+
+                if (rfcDestination == null || rfcRepository == null)
+                {
+                    rfcDestination = RfcDestinationManager
+                   .GetDestination(destinationName: _sapConfiguration.DestinationName);
+                    rfcRepository = rfcDestination.Repository;
+                }
+
+                return rfcRepository.CreateFunction(functionName);
+            }
+            catch (Exception)
+            {
+                throw new Exception("Check Sap Connection !");
+            }
         }
     }
 }

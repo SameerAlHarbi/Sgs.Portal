@@ -11,7 +11,7 @@ using System.Web.Http.Description;
 
 namespace Sgs.Portal.Erp.Api.Controllers
 {
-    [RoutePrefix("countries")]
+    //[RoutePrefix("countries")]
     public class CountriesController : BaseApiController
     {
         private readonly IErpCountriesManager _countriesManager;
@@ -26,11 +26,23 @@ namespace Sgs.Portal.Erp.Api.Controllers
         [Route()]
         [ResponseType(typeof(IEnumerable<Country>))]
         [HttpGet()]
-        public async Task<IHttpActionResult> Get(string codes = null, string name = null, string nationalityName = null, string language = "AR,EN")
+        [Route("countries")]
+        public async Task<IHttpActionResult> GetCountries(string codes = null
+            , string name = null
+            , string nationalityName = null
+            , bool fillRegions = false
+            , bool fillCities = true
+            , string language = "AR,EN")
         {
             try
             {
-                var results = await _countriesManager.GetCountriesCollection(codes?.Split(','),name,nationalityName,language: language);
+                var results = await _countriesManager
+                    .GetCountriesCollectionAsync(codes?.Split(',')
+                        , name
+                        , nationalityName
+                        , fillRegions
+                        , fillCities
+                        , language: language);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -39,12 +51,12 @@ namespace Sgs.Portal.Erp.Api.Controllers
             }
         }
 
-        [Route("{code}")]
-        public async Task<IHttpActionResult> Get(string code)
+        [Route("countries/{code}")]
+        public async Task<IHttpActionResult> GetCountry(string code)
         {
             try
             {
-                var results = await _countriesManager.GetCountriesCollection(new string[] { code });
+                var results = await _countriesManager.GetCountriesCollectionAsync(new string[] { code });
                 var result = results.FirstOrDefault();
 
                 if (result == null)
@@ -60,12 +72,26 @@ namespace Sgs.Portal.Erp.Api.Controllers
             }
         }
 
-        [Route("config/test")]
+        [Route()]
+        [ResponseType(typeof(IEnumerable<Country>))]
         [HttpGet()]
-        public async Task<IHttpActionResult> GetConfigRead()
+        [Route("cities")]
+        public async Task<IHttpActionResult> GetCities(string codes = null, string name = null, string countries = null,string regions = null, string language = "AR,EN")
         {
-            return Ok(ConfigurationManager.AppSettings["test"]);
+            try
+            {
+                var results = await _countriesManager.GetCitiesCollectionAsync(codes?.Split(',')
+                    , name
+                    , countries?.Split(',')
+                    , regions?.Split(',')
+                    , language: language
+                    );
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
         }
-
     }
 }
