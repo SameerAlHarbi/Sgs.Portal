@@ -47,8 +47,8 @@ namespace Sgs.Portal.Erp.Api
                 .As<IDestinationConfiguration>()
                 .InstancePerRequest();
 
-            bldr.RegisterType<SapCountriesManager>()
-                .As<IErpCountriesManager>()
+            bldr.RegisterType<SapInternationalManager>()
+                .As<IErpInternationalManager>()
                 .InstancePerRequest();
 
             //bldr.RegisterType<CampContext>()

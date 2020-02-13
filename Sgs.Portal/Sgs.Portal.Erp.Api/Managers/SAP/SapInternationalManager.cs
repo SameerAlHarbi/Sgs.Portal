@@ -1,5 +1,5 @@
 ﻿using SAP.Middleware.Connector;
-using Sgs.Portal.Erp.Api.Models;
+using Sgs.Portal.Erp.Api.Models.International;
 using Sgs.Portal.Erp.Api.Services;
 using System;
 using System.Collections.Concurrent;
@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Sgs.Portal.Erp.Api.Managers.SAP
 {
-    public class SapCountriesManager : SapManager, IErpCountriesManager
+    public class SapInternationalManager : SapManager, IErpInternationalManager
     {
-        public SapCountriesManager(IDestinationConfiguration destinationConfiguration, ISapConfiguration sapConfiguration)
+        public SapInternationalManager(IDestinationConfiguration destinationConfiguration, ISapConfiguration sapConfiguration)
             : base(destinationConfiguration, sapConfiguration)
         {
         }
@@ -85,6 +85,7 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                             .FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.NationalityName_Ar))?.NationalityName_Ar ?? string.Empty,
                         NationalityName_En = resultsGroup
                             .FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.NationalityName_En))?.NationalityName_En ?? string.Empty,
+                        Regions = new List<Region>()
                     });
                 });
 
@@ -94,13 +95,13 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                 if (finalResults.Count > 0)
                 {
                     finalResults = finalResults.Where(r => (codes == null
-                             || codes.Any(c => c.Trim().ToUpper() == r.Code.Trim().ToUpper()))
+                             || codes.Any(c => c.Trim().ToLower() == r.Code.Trim().ToLower()))
                          && (string.IsNullOrWhiteSpace(name)
-                             || r.Name_Ar.Trim().ToUpper().Contains(name.Trim().ToUpper())
-                             || r.Name_En.Trim().ToUpper().Contains(name.Trim().ToUpper()))
+                             || r.Name_Ar.Trim().ToLower().Contains(name.Trim().ToLower())
+                             || r.Name_En.Trim().ToLower().Contains(name.Trim().ToLower()))
                          && (string.IsNullOrWhiteSpace(nationalityName)
-                             || r.NationalityName_Ar.Trim().ToUpper().Contains(nationalityName.Trim().ToUpper())
-                             || r.NationalityName_En.Trim().ToUpper().Contains(nationalityName.Trim().ToUpper()))
+                             || r.NationalityName_Ar.Trim().ToLower().Contains(nationalityName.Trim().ToLower())
+                             || r.NationalityName_En.Trim().ToLower().Contains(nationalityName.Trim().ToLower()))
                          ).ToList();
                 }
 
@@ -117,72 +118,15 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
         {
             try
             {
-                var arabicResults = new List<Region>();
-                var englishResults = new List<Region>();
-                var results = new List<Region>();
-
-                IRfcFunction func = this.getIRfcFunction("Z_COUNTRY_NATIONALITY");
-
-                //Fill arabic list
-                if (arabic)
-                {
-                    func["IM_LANGU"].SetValue('A');
-                    func.Invoke(rfcDestination);
-
-                    arabicResults = func["T_CONT_NATI"].GetTable()
-                        .Select(c => new Region
-                        {
-                            Code = c.GetValue("LAND1").ToString(),
-                            Name_Ar = c.GetValue("LANDX50").ToString(),
-                            CountryCode = c.GetValue("NATIO50").ToString()
-                        }).ToList();
-                }
-
-                //Fill english list
-                if (english)
-                {
-                    func["IM_LANGU"].SetValue('E');
-                    func.Invoke(rfcDestination);
-
-                    englishResults = func["T_CONT_NATI"].GetTable()
-                        .Select(c => new Region
-                        {
-                            Code = c.GetValue("LAND1").ToString(),
-                            Name_En = c.GetValue("LANDX50").ToString(),
-                            CountryCode = c.GetValue("NATIO50").ToString()
-                        }).ToList();
-                }
-
-                //Merge arabic and english
-                if (arabicResults.Count() > 0)
-                {
-                    foreach (var arabicResult in arabicResults)
-                    {
-                        var englishResult = englishResults.FirstOrDefault(r => r.Code == arabicResult.Code);
-                        arabicResult.Name_En = englishResult?.Name_En ?? null;
-                    }
-
-                    results = arabicResults;
-                }
-                else
-                {
-                    results = englishResults;
-                }
-
-                //Apply Filters
-                if (results.Count > 0)
-                {
-                    results = results.Where(r => (codes == null
-                            || codes.Any(c => c.Trim().ToUpper() == r.Code.Trim().ToUpper()))
-                        && (string.IsNullOrWhiteSpace(name)
-                            || r.Name_Ar.Trim().ToUpper().Contains(name.Trim().ToUpper())
-                            || r.Name_En.Trim().ToUpper().Contains(name.Trim().ToUpper()))
-                        && (countriesCodes == null
-                            || countriesCodes.Any(c => c.Trim().ToUpper() == r.CountryCode.Trim().ToUpper()))
-                        ).ToList();
-                }
-
-                return await Task.FromResult(results);
+                var cities = await getCitiesListAsync(null, null, countriesCodes, codes, arabic, english);
+                return cities?.GroupBy(c => new { c.CountryCode, c.RegionCode })
+                            .Select(cg => new Region
+                            {
+                                Code = cg.Key.RegionCode,
+                                CountryCode = cg.Key.CountryCode,
+                                Name_Ar = string.Empty,
+                                Name_En = string.Empty
+                            }).Distinct().ToList() ?? new List<Region>();
             }
             catch (Exception)
             {
@@ -254,7 +198,8 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                 : new List<City>();
 
                 //Merge arabic and english results.
-                var allResults = arabicResults.Union(englishResults).Where( c => !string.IsNullOrWhiteSpace(c.CountryCode) 
+                var allResults = arabicResults.Union(englishResults).Where( c => !string.IsNullOrWhiteSpace(c.Code)
+                    && !string.IsNullOrWhiteSpace(c.CountryCode) 
                     && !string.IsNullOrWhiteSpace(c.RegionCode));
                 var mergedResults = new ConcurrentBag<City>();
                 Parallel.ForEach(allResults.GroupBy(c => new { c.Code, c.CountryCode }), resultsGroup =>
@@ -264,8 +209,9 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                         Code = resultsGroup.Key.Code,
                         Name_Ar = resultsGroup.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.Name_Ar))?.Name_Ar ?? string.Empty,
                         Name_En = resultsGroup.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.Name_En))?.Name_En ?? string.Empty,
-                        RegionCode = resultsGroup.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c.RegionCode))?.RegionCode ?? string.Empty,
-                        CountryCode = resultsGroup.Key.CountryCode
+                        RegionCode = resultsGroup.FirstOrDefault().RegionCode,
+                        CountryCode = resultsGroup.Key.CountryCode,
+                        Airports = new List<Airport>()
                     });
                 });
 
@@ -275,14 +221,14 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                 if (mergedResults.Count > 0)
                 {
                     finalResults = finalResults.Where(r => (codes == null
-                            || codes.Any(c => c.Trim().ToUpper() == r.Code.Trim().ToUpper()))
+                            || codes.Any(c => c.Trim().ToLower() == r.Code.Trim().ToLower()))
                         && (string.IsNullOrWhiteSpace(name)
-                            || r.Name_Ar.Trim().ToUpper().Contains(name.Trim().ToUpper())
-                            || r.Name_En.Trim().ToUpper().Contains(name.Trim().ToUpper()))
+                            || r.Name_Ar.Trim().ToLower().Contains(name.Trim().ToLower())
+                            || r.Name_En.Trim().ToLower().Contains(name.Trim().ToLower()))
                         && (countriesCodes == null
-                            || countriesCodes.Any(c => c.Trim().ToUpper() == r.CountryCode.Trim().ToUpper()))
+                            || countriesCodes.Any(c => c.Trim().ToLower() == r.CountryCode.Trim().ToLower()))
                         && (regionsCodes == null
-                            || regionsCodes.Any(c => c.Trim().ToUpper() == r.RegionCode.Trim().ToUpper()))
+                            || regionsCodes.Any(c => c.Trim().ToLower() == r.RegionCode.Trim().ToLower()))
                         ).ToList();
                 }
 
@@ -291,6 +237,7 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
             });
         }
 
+        //TODO: Fill Airports
         public async Task<IEnumerable<Country>> GetCountriesCollectionAsync(string[] codes = null
             , string name = null
             , string nationalityName = ""
@@ -326,7 +273,7 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
                         , arabic
                         , english);
 
-                    var regionsResults = citiesResults
+                    var regionsResults = citiesResults?
                         .GroupBy(c => new { c.CountryCode, c.RegionCode })
                         .Select(cg => new Region
                         {
@@ -353,11 +300,54 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
             }
         }
 
-        public Task<IEnumerable<Region>> GetRegionsCollectionAsync(string[] codes = null, string name = null,
-            string[] countriesCodes = null, bool fillCities = true,
-            bool fillAirports = false, string language = "AR,EN")
+
+        //TODO: Enhance sap regions info
+        public async Task<IEnumerable<Region>> GetRegionsCollectionAsync(string[] codes = null
+            , string name = null
+            , string[] countriesCodes = null
+            , bool fillCities = true
+            , bool fillAirports = false
+            , string language = "AR,EN")
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Setup language choices
+                language = !string.IsNullOrWhiteSpace(language) ? language : "AR,EN";
+                var languages = language.Trim().ToUpper().Split(',');
+                bool english = languages.Contains("EN");
+                bool arabic = languages.Contains("AR") || !english;
+
+                var citiesResults = await getCitiesListAsync(null
+                    , null
+                    , countriesCodes
+                    , codes
+                    , arabic
+                    , english);
+
+                var regionsResults = citiesResults?
+                        .GroupBy(c => new { c.CountryCode, c.RegionCode })
+                        .Select(cg => new Region
+                        {
+                            Code = cg.Key.RegionCode,
+                            CountryCode = cg.Key.CountryCode,
+                            Name_Ar = string.Empty,
+                            Name_En = string.Empty,
+                            Cities = fillCities ? cg.ToList() : new List<City>()
+                        }).ToList() ?? new List<Region>();
+
+                regionsResults = regionsResults
+                    .Where(r => 
+                            string.IsNullOrWhiteSpace(name) 
+                         || r.Name_Ar.Trim().ToLower().Contains(name.Trim().ToLower())
+                         || r.Name_En.Trim().ToLower().Contains(name.Trim().ToLower()))
+                    .ToList();
+
+                return regionsResults;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public async Task<IEnumerable<City>> GetCitiesCollectionAsync(string[] codes = null,
@@ -388,16 +378,15 @@ namespace Sgs.Portal.Erp.Api.Managers.SAP
             }
         }
 
+        //TODO: Fill Airports
         public async Task<IEnumerable<Airport>> GetAirportCollectionAsync(string[] codes = null,
             string name = null,
             string[] countriesCodes = null,
             string[] citiesCodes = null,
             string language = "AR,EN")
         {
-            throw new NotImplementedException();
+            return await Task.FromResult(new List<Airport>());
         }
-
-
 
 
     }

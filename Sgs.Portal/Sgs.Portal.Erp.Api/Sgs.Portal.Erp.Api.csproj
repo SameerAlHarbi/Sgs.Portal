@@ -103,7 +103,7 @@
     <Compile Include="App_Start\AutofacConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\BaseApiController.cs" />
-    <Compile Include="Controllers\CountriesController.cs" />
+    <Compile Include="Controllers\InternationalController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -111,14 +111,15 @@
     <Compile Include="Managers\SAP\ISapConfiguration.cs" />
     <Compile Include="Managers\SAP\SapConfiguration.cs" />
     <Compile Include="Managers\SAP\SapDestinationConfiguration.cs" />
-    <Compile Include="Managers\SAP\SapCountriesManager.cs" />
+    <Compile Include="Managers\SAP\SapInternationalManager.cs" />
     <Compile Include="Managers\SAP\SapManager.cs" />
-    <Compile Include="Models\Airport.cs" />
-    <Compile Include="Models\City.cs" />
-    <Compile Include="Models\Country.cs" />
-    <Compile Include="Models\Region.cs" />
+    <Compile Include="Models\International\City.cs" />
+    <Compile Include="Models\International\Airport.cs" />
+    <Compile Include="Models\International\Country.cs" />
+    <Compile Include="Models\International\Region.cs" />
+    <Compile Include="Models\Vacations\VacationType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\IErpCountriesManager.cs" />
+    <Compile Include="Services\IErpInternationalManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

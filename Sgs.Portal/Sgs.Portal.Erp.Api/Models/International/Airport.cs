@@ -1,4 +1,4 @@
-﻿namespace Sgs.Portal.Erp.Api.Models
+﻿namespace Sgs.Portal.Erp.Api.Models.International
 {
     public class Airport
     {
@@ -17,5 +17,9 @@
         public bool Approved { get; set; }
 
         public string CityCode { get; set; }
+
+        public string RegionCode { get; set; }
+
+        public string CountryCode { get; set; }
     }
 }

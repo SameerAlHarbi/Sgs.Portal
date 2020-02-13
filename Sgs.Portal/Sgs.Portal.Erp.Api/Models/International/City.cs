@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Sgs.Portal.Erp.Api.Models
+namespace Sgs.Portal.Erp.Api.Models.International
 {
-    public class Region
+    public class City
     {
         public string Code { get; set; }
 
@@ -12,6 +12,8 @@ namespace Sgs.Portal.Erp.Api.Models
 
         public string CountryCode { get; set; }
 
-        public List<City> Cities { get; set; }
+        public string RegionCode { get; set; }
+
+        public List<Airport> Airports { get; set; }
     }
 }

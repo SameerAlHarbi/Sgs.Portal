@@ -1,10 +1,10 @@
-﻿using Sgs.Portal.Erp.Api.Models;
+﻿using Sgs.Portal.Erp.Api.Models.International;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Sgs.Portal.Erp.Api.Services
 {
-    public interface IErpCountriesManager
+    public interface IErpInternationalManager
     {
         Task<IEnumerable<Country>> GetCountriesCollectionAsync(string[] codes = null
             , string name = null

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sgs.Portal.Erp.Api.Models
+namespace Sgs.Portal.Erp.Api.Models.International
 {
     public class Country
     {
